@@ -21,10 +21,10 @@
                     <el-form-item label="姓名：" prop="name">
                         <el-input v-model="ruleForm.name" placeholder="请输入姓名" style="width: 300px" />
                     </el-form-item>
-                    <el-form-item label="班级：" prop="classValue">
-                        <el-select v-model="ruleForm.classValue" placeholder="请选择班级" style="width: 300px">
-                            <el-option label="11班" value="11" />
-                            <el-option label="12班" value="12" />
+                    <el-form-item label="班级：" prop="class_id">
+                        <el-select v-model="ruleForm.class_id" placeholder="请选择班级" style="width: 300px">
+                            <el-option label="11班" value="b8e1a3f4-72a4-24fe-7588-c28a1b5ee327" />
+                            <el-option label="12班" value="ea457cb1-b376-e97f-58fd-90f76b448e85" />
                         </el-select>
                     </el-form-item>
                 </el-form>
@@ -32,7 +32,7 @@
             <template #footer>
                 <div class="student-dialog__footer">
                     <el-button @click="close">关闭</el-button>
-                    <el-button type="primary" @click="visible = false">确定</el-button>
+                    <el-button type="primary" @click="submitForm">确定</el-button>
                 </div>
             </template>
         </el-dialog>
@@ -41,6 +41,7 @@
 <script lang="ts" setup>
 import {reactive, ref} from 'vue';
 import {StudentModel} from './student.model';
+import service from './student.service';
 
 const props = defineProps({
     edit: {
@@ -48,11 +49,15 @@ const props = defineProps({
         default: false,
     },
 });
+const emit = defineEmits(['reload']);
+
 const visible = ref(false);
+const id = ref('');
 const open = (row?: StudentModel) => {
     if (row) {
+        id.value = row.id;
         ruleForm.name = row.name;
-        ruleForm.classValue = row.classValue;
+        ruleForm.class_id = row.class_id;
     }
     visible.value = true;
 };
@@ -60,12 +65,12 @@ const open = (row?: StudentModel) => {
 const formRef = ref();
 const ruleForm = reactive({
     name: '',
-    classValue: '',
+    class_id: '',
 });
 
 const rules = reactive({
     name: [{required: true, message: '请输入姓名', trigger: 'blur'}],
-    classValue: [
+    class_id: [
         {
             required: true,
             message: '请选择班级',
@@ -79,10 +84,30 @@ const close = () => {
     resetForm();
 };
 
+const addStudent = async () => {
+    const res = await service.addStudent(ruleForm.name, ruleForm.class_id);
+    if (res.status) {
+        emit('reload');
+        close();
+    }
+};
+
+const updateStudent = async () => {
+    const res = await service.updateStudent(id.value, ruleForm.name, ruleForm.class_id);
+    if (res.status) {
+        emit('reload');
+        close();
+    }
+};
+
 const submitForm = async () => {
-    await formRef.value.validate((valid: boolean) => {
+    await formRef.value.validate(async (valid: boolean) => {
         if (valid) {
-            console.log('submit!');
+            if (!props.edit) {
+                await addStudent();
+            } else {
+                await updateStudent();
+            }
             resetForm();
         }
     });
@@ -104,13 +129,6 @@ defineExpose({
 }
 
 .student-dialog {
-    .my-header {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        gap: 16px;
-    }
-
     &__footer {
         text-align: right;
     }

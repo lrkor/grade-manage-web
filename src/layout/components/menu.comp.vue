@@ -5,6 +5,7 @@
             :collapse-transition="false"
             :default-openeds="['baseData']"
             background-color="#545c64"
+            default-active="baseData1"
             text-color="#fff"
         >
             <el-sub-menu v-for="(item, index) in menuList" :index="item.id">
@@ -14,7 +15,7 @@
                     </el-icon>
                     <span>{{ item.name }}</span>
                 </template>
-                <el-menu-item v-for="child in item.children" :index="child.id" @click="skip(child.path)"
+                <el-menu-item v-for="child in item.children" :index="child.id" @click="skip(child.path!)"
                     >{{ child.name }}
                 </el-menu-item>
             </el-sub-menu>

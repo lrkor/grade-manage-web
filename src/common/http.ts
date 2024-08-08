@@ -3,8 +3,8 @@ import {ElMessage} from 'element-plus';
 
 // axios 请求配置
 const config = {
-    // baseURL:'http://localhost:8080',
-    baseURL: 'https://mock.mengxuegu.com/mock/66960657027fa7048df2cf02/api/v1',
+    baseURL: 'http://localhost:8083/',
+    // baseURL: 'https://mock.mengxuegu.com/mock/66960657027fa7048df2cf02/api/v1',
     timeout: 1000,
 };
 
@@ -71,7 +71,7 @@ class Http {
         // 请求返回处理
         this.instance.interceptors.response.use(
             (res: AxiosResponse) => {
-                if (res.data.code != 200) {
+                if (res.data.code != 200 && res.data.code != 201) {
                     ElMessage.error(res.data.msg || '服务器出错啦');
                     return Promise.reject(res.data.msg || '服务器出错啦');
                 } else {

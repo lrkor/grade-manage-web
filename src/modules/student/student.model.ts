@@ -1,7 +1,6 @@
 export interface StudentModel {
     id: string;
     name: string;
-    className: string;
-    classValue: string;
-    lastGrade: number;
+    class_name: string;
+    class_id: string;
 }
