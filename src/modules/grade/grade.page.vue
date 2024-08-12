@@ -21,8 +21,8 @@
                         placeholder="请选择学期"
                         @change="reloadData(true)"
                     >
-                        <el-option label="上学期" value="1" />
-                        <el-option label="下学期" value="2" />
+                        <el-option label="第一学期" value="1" />
+                        <el-option label="第二学期" value="2" />
                     </el-select>
                 </el-form-item>
                 <el-form-item label="考试：">
@@ -55,7 +55,7 @@
                 <el-table-column align="center" label="年度" prop="year" />
                 <el-table-column align="center" label="学期" prop="semester">
                     <template #default="{row}">
-                        {{ row.semester === 1 ? '上学期' : '下学期' }}
+                        {{ row.semester === '1' ? '第一学期' : '第二学期' }}
                     </template>
                 </el-table-column>
                 <el-table-column align="center" label="考试" prop="exam">

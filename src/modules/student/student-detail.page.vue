@@ -16,8 +16,8 @@
                 </el-form-item>
                 <el-form-item label="学期：">
                     <el-select v-model="formData.semester" clearable placeholder="请选择学期">
-                        <el-option label="上学期" value="1" />
-                        <el-option label="下学期" value="2" />
+                        <el-option label="第一学期" value="1" />
+                        <el-option label="第二学期" value="2" />
                     </el-select>
                 </el-form-item>
                 <el-form-item>
@@ -54,38 +54,9 @@ const id = route.query.id as string;
 const name = route.query.name + '的成绩';
 
 const echarts = ref();
-const dataX = ref<string[]>(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
-const series = ref<EchartsLineBarSeriesModel[]>([
-    {
-        name: '销量',
-        type: 'bar',
-        data: [5, 20, 36, 10, 10, 20, 10, 20, 36, 10, 10, 20],
-        color: colorBlue,
-        smooth: true,
-    },
-    {
-        name: '销量',
-        type: 'bar',
-        data: [5, 20, 36, 10, 10, 20, 10, 20, 36, 10, 10, 20],
-        color: colorRed,
-        smooth: true,
-    },
-]);
+const dataX = ref<string[]>([]);
+const series = ref<EchartsLineBarSeriesModel[]>([]);
 const boundaryGap = ref(true);
-
-const change = () => {
-    dataX.value = ['1', '2', '33', '55', '5', 'ss', '7', '8', '9', '10', '11', '12'];
-    boundaryGap.value = !boundaryGap.value;
-    series.value = [
-        {
-            name: '销量',
-            type: 'line',
-            data: [5, 20, 36, 10, 10, 20, 10, 20, 36, 10, 10, 20],
-            color: colorBlue,
-            smooth: true,
-        },
-    ];
-};
 
 const tbChange = () => {
     if (formData.tb === '1') {
@@ -118,6 +89,11 @@ const getStudentGrades = async () => {
                 data: dataY,
                 color: colorBlue,
                 smooth: true,
+                label: {
+                    show: true,
+                    position: 'top', // 显示在柱子上方
+                    formatter: '{c}', // 显示值
+                },
             },
         ];
     }
@@ -141,6 +117,11 @@ const getStudentGradesCompare = async () => {
                 data: dataY1,
                 color: colorBlue,
                 smooth: true,
+                label: {
+                    show: true,
+                    position: 'top', // 显示在柱子上方
+                    formatter: '{c}', // 显示值
+                },
             },
             {
                 name: '上期成绩',
@@ -148,6 +129,11 @@ const getStudentGradesCompare = async () => {
                 color: colorRed,
                 smooth: true,
                 data: dataY2,
+                label: {
+                    show: true,
+                    position: 'top', // 显示在柱子上方
+                    formatter: '{c}', // 显示值
+                },
             },
         ];
     }

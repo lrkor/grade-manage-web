@@ -4,6 +4,7 @@ export interface EchartsLineBarSeriesModel {
     color: string;
     data: number[];
     smooth: boolean;
+    label?: any;
 }
 
 export interface EchartsLineBarGridModel {

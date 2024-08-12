@@ -41,8 +41,8 @@
                     </el-form-item>
                     <el-form-item label="学期：" prop="semester">
                         <el-select v-model="ruleForm.semester" clearable placeholder="请选择学期">
-                            <el-option label="上学期" value="1" />
-                            <el-option label="下学期" value="2" />
+                            <el-option label="第一学期" value="1" />
+                            <el-option label="第二学期" value="2" />
                         </el-select>
                     </el-form-item>
                     <el-form-item label="考试：" prop="exam">
