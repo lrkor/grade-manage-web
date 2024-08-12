@@ -1,6 +1,6 @@
 import http from '@/common/http';
 import {AxiosResponse} from 'axios';
-import {StudentModel} from '@/modules/student/student.model';
+import {StudentGradeCompareModel, StudentGradeModel, StudentModel} from '@/modules/student/student.model';
 import PageModel from '@/common/models/page.model';
 
 export default class studentAPI {
@@ -31,5 +31,17 @@ export default class studentAPI {
     // 修改表格数据
     static updateStudent(id: string, name: string, class_id: string): Promise<AxiosResponse<{id: string}>> {
         return http.put(`/student/${id}`, {name, class_id});
+    }
+
+    static getStudentGrades(id: string, year: string, semester: string): Promise<AxiosResponse<StudentGradeModel[]>> {
+        return http.get(`/grade/get-student-grades/${id}/${year}/${semester}`);
+    }
+
+    static getStudentGradesCompare(
+        id: string,
+        year: string,
+        semester: string
+    ): Promise<AxiosResponse<StudentGradeCompareModel[]>> {
+        return http.get(`/grade/get-student-compare-grades/${id}/${year}/${semester}`);
     }
 }

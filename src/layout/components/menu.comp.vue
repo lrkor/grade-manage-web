@@ -3,9 +3,9 @@
         <el-menu
             :collapse="isCollapse"
             :collapse-transition="false"
+            :default-active="menuIndex"
             :default-openeds="['baseData']"
             background-color="#545c64"
-            default-active="baseData1"
             text-color="#fff"
         >
             <el-sub-menu v-for="(item, index) in menuList" :index="item.id">
@@ -15,7 +15,7 @@
                     </el-icon>
                     <span>{{ item.name }}</span>
                 </template>
-                <el-menu-item v-for="child in item.children" :index="child.id" @click="skip(child.path!)"
+                <el-menu-item v-for="child in item.children" :index="child.id" @click="skip(child)"
                     >{{ child.name }}
                 </el-menu-item>
             </el-sub-menu>
@@ -24,38 +24,38 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from 'vue';
-import {Grid} from '@element-plus/icons-vue';
+import {ref, watch} from 'vue';
 import MenuModel from '@/common/models/menu.model';
 import {useRouter} from 'vue-router';
+import {menuIndex, menuList} from '@/common/menu';
 
 const isCollapse = ref(false);
-const activeMenuIndex = ref(0);
-const menuList: MenuModel[] = [
-    {
-        id: 'baseData',
-        name: '学生成绩',
-        icon: Grid,
-        activeIcon: Grid,
-        path: '',
-        children: [
-            {
-                id: 'baseData1',
-                name: '学生列表',
-                path: '/student',
-            },
-            {
-                id: 'grade',
-                name: '成绩列表',
-                path: '/grade',
-            },
-        ],
-    },
-];
+
 const router = useRouter();
-const skip = (path: string) => {
-    router.push(path);
+const skip = (child: MenuModel) => {
+    router.push(child.path!);
 };
+watch(
+    () => router.currentRoute.value,
+    newValue => {
+        const currentPath = newValue.path;
+        menuList.forEach((item, index) => {
+            if (currentPath === item.path) {
+                menuIndex.value = item.id;
+            }
+            if (item.children) {
+                item.children.forEach((child, index) => {
+                    if (currentPath === child.path) {
+                        menuIndex.value = child.id;
+                    }
+                });
+            }
+        });
+    },
+    {
+        immediate: true,
+    }
+);
 </script>
 
 <style lang="scss" scoped>

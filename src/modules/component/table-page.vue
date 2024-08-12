@@ -5,19 +5,18 @@
                 :data="tableData"
                 :header-cell-style="{color: '#333', fontSize: '16px'}"
                 border
-                empty-text="--"
+                empty-text="暂无数据"
                 size="large"
                 stripe
                 style="width: 100%"
             >
                 <slot></slot>
-                >
             </el-table>
         </div>
         <div class="table-page-bottom">
             <el-pagination
                 :background="true"
-                :current-page="currentPage"
+                :current-page="pageNum"
                 :page-size="10"
                 :total="total"
                 hide-on-single-page
@@ -28,7 +27,6 @@
     </div>
 </template>
 <script lang="ts" setup>
-import {ref} from 'vue';
 
 const props = defineProps({
     tableData: {
@@ -39,13 +37,15 @@ const props = defineProps({
         type: Number,
         default: 0,
     },
+    pageNum: {
+        type: Number,
+        default: 1,
+    },
 });
 
 const emit = defineEmits(['currentChange']);
 
-const currentPage = ref(1);
 const handleCurrentChange = (val: number) => {
-    currentPage.value = val;
     emit('currentChange', val);
 };
 </script>

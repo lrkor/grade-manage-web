@@ -17,17 +17,22 @@
             </div>
         </div>
         <div class="student-table">
-            <tablePage :table-data="tableData" :total="totalCount" @current-change="handleCurrentChange">
+            <table-page
+                :page-num="currentPage"
+                :table-data="tableData"
+                :total="totalCount"
+                @current-change="handleCurrentChange"
+            >
                 <el-table-column align="center" label="学生姓名" prop="name" />
                 <el-table-column align="center" label="班级" prop="class_name" />
                 <el-table-column align="center" label="操作" width="210">
                     <template #default="{row}">
-                        <el-button size="small" type="info" @click="detail(row.id)">详情</el-button>
+                        <el-button size="small" type="info" @click="detail(row)">详情</el-button>
                         <el-button size="small" type="primary" @click="editStudent(row)">编辑</el-button>
                         <el-button size="small" type="danger" @click="delStudent(row.id)">删除</el-button>
                     </template>
                 </el-table-column>
-            </tablePage>
+            </table-page>
         </div>
         <student-dialog ref="dialog" :edit="edit" @reload="reloadData"></student-dialog>
     </div>
@@ -82,11 +87,12 @@ const delStudent = async (id: string) => {
     });
 };
 
-const detail = (id: string) => {
+const detail = (row: StudentModel) => {
     router.push({
         path: '/student/detail',
         query: {
-            id,
+            id: row.id,
+            name: row.name,
         },
     });
 };

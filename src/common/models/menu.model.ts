@@ -6,5 +6,5 @@ export default interface MenuModel {
     children?: MenuModel[];
     icon?: DefineComponent<any, any, any>;
     activeIcon?: DefineComponent<any, any, any>;
-    path?: string;
+    path: string;
 }

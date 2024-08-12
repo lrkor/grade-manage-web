@@ -3,7 +3,6 @@ import LoginPage from '@/login.page.vue';
 import layout from '@/layout/index.vue';
 import Page403 from './modules/error-page/403.page.vue';
 import Page404 from './modules/error-page/404.page.vue';
-import store from './common/store';
 
 import {RouteModel} from '@/common/models/tabs.model';
 
@@ -76,14 +75,6 @@ const router = createRouter({
 } as RouterOptions);
 
 router.beforeEach((to: any, from: any, next: any) => {
-    const tabsOption = store.state.tabsOption;
-    // 判断当前路由中是否已经入栈
-    const flag = tabsOption.findIndex((tab: {route: string}) => tab.route === to.path) > -1;
-
-    if (!flag && !to.meta.hiddenTab) {
-        store.commit('addTab', {route: to.path, title: to.meta.title, name: to.name, meta: to.meta});
-    }
-    store.commit('setTab', to.path);
     next();
 });
 

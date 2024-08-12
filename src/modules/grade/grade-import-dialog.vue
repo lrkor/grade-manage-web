@@ -18,9 +18,6 @@
                     label-width="80px"
                     size="large"
                 >
-                    <el-form-item label="姓名：" prop="name">
-                        <el-input v-model="ruleForm.name" placeholder="请输入姓名" style="width: 300px" />
-                    </el-form-item>
                     <el-form-item label="班级：" prop="class_id">
                         <el-select v-model="ruleForm.class_id" placeholder="请选择班级" style="width: 300px">
                             <el-option label="11班" value="b8e1a3f4-72a4-24fe-7588-c28a1b5ee327" />
@@ -53,8 +50,22 @@
                             <el-option label="第四次" value="4" />
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="成绩：" prop="score">
-                        <el-input-number v-model="ruleForm.score" :max="150" :min="0" />
+                    <el-form-item label="文件：" prop="file_id">
+                        <el-upload
+                            v-model:file-list="fileList"
+                            :before-remove="beforeRemove"
+                            :http-request="uploadFile"
+                            :limit="3"
+                            :on-exceed="handleExceed"
+                            :on-preview="handlePreview"
+                            :on-remove="handleRemove"
+                            class="upload-demo"
+                        >
+                            <el-button type="primary">文件上传</el-button>
+                            <template #tip>
+                                <div class="el-upload__tip">Excel 文件上传</div>
+                            </template>
+                        </el-upload>
                     </el-form-item>
                 </el-form>
             </div>
@@ -69,43 +80,32 @@
 </template>
 <script lang="ts" setup>
 import {reactive, ref} from 'vue';
-import {GradeModel} from './grade.model';
+import type {UploadProps, UploadUserFile} from 'element-plus';
+import {ElMessage, ElMessageBox} from 'element-plus';
 import service from './grade.service';
 
+const emit = defineEmits(['reload']);
 const props = defineProps({
     edit: {
         type: Boolean,
         default: false,
     },
 });
-const emit = defineEmits(['reload']);
-const id = ref('');
-
 const visible = ref(false);
-const open = (row?: GradeModel) => {
-    if (row) {
-        ruleForm.name = row.student_name;
-        ruleForm.class_id = row.class_id;
-        ruleForm.score = row.score;
-        ruleForm.year = row.year;
-        ruleForm.exam = row.exam;
-        ruleForm.semester = row.semester;
-        id.value = row.id;
-    }
+const open = () => {
     visible.value = true;
 };
+
 const formRef = ref();
 const ruleForm = reactive({
-    name: '',
     class_id: '',
+    file_id: '',
     year: '',
     exam: '',
     semester: '',
-    score: 0,
 });
 
 const rules = reactive({
-    name: [{required: true, message: '请输入姓名', trigger: 'blur'}],
     class_id: [
         {
             required: true,
@@ -134,7 +134,13 @@ const rules = reactive({
             trigger: 'change',
         },
     ],
-    score: [{required: true, message: '请输入成绩', trigger: 'blur'}],
+    file_id: [
+        {
+            required: true,
+            message: '请上传文件',
+            trigger: 'change',
+        },
+    ],
 });
 
 const close = () => {
@@ -142,37 +148,53 @@ const close = () => {
     resetForm();
 };
 
-const addGrade = async () => {
-    const res = await service.addGrade(ruleForm);
-    if (res.status) {
-        emit('reload');
-        close();
-    }
-};
-
-const updateGrade = async () => {
-    const res = await service.updateGrade(id.value, ruleForm);
-    if (res.status) {
-        emit('reload');
-        close();
-    }
-};
-
 const submitForm = async () => {
     await formRef.value.validate(async (valid: boolean) => {
         if (valid) {
-            if (props.edit) {
-                await updateGrade();
-            } else {
-                await addGrade();
+            const res = await service.addImportGrade(ruleForm);
+            if (res.status) {
+                ElMessage.success('导入成功');
+                emit('reload');
+                close();
             }
-            resetForm();
         }
     });
 };
 
 const resetForm = () => {
     formRef.value.resetFields();
+};
+
+const fileList = ref<UploadUserFile[]>([]);
+
+const uploadFile = async (options: any) => {
+    const res = await service.uploadFile(options.file);
+    if (res.status) {
+        ruleForm.file_id = res.data.file_id;
+    }
+};
+
+const handleRemove: UploadProps['onRemove'] = (file, uploadFiles) => {
+    console.log(file, uploadFiles);
+};
+
+const handlePreview: UploadProps['onPreview'] = uploadFile => {
+    console.log(uploadFile);
+};
+
+const handleExceed: UploadProps['onExceed'] = (files, uploadFiles) => {
+    ElMessage.warning(
+        `The limit is 3, you selected ${files.length} files this time, add up to ${
+            files.length + uploadFiles.length
+        } totally`
+    );
+};
+
+const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
+    return ElMessageBox.confirm(`Cancel the transfer of ${uploadFile.name} ?`).then(
+        () => true,
+        () => false
+    );
 };
 
 defineExpose({
@@ -192,6 +214,10 @@ defineExpose({
 
 :deep(.el-input-number) {
     width: 300px;
+}
+
+:deep(.el-upload-list) {
+    width: 200px;
 }
 
 .student-dialog {

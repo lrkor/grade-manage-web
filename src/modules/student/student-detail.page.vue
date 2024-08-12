@@ -34,16 +34,24 @@
                 :boundary-gap="boundaryGap"
                 :data-x="dataX"
                 :series="series"
+                :title="name"
             ></line-bar-echarts>
         </div>
     </div>
 </template>
 <script lang="ts" setup>
-import {reactive, ref} from 'vue';
+import {onMounted, reactive, ref} from 'vue';
 import lineBarEcharts from '@/common/echarts/line-bar-echarts.vue';
 import {EchartsLineBarSeriesModel} from '@/common/echarts/echarts-line-bar.model';
-import {colorBlue} from '@/common/echarts/echarts-color';
+import {colorBlue, colorRed} from '@/common/echarts/echarts-color';
 import moment from 'moment/moment';
+import {useRoute} from 'vue-router';
+import service from './student.service';
+import {StudentGradeCompareModel, StudentGradeModel} from '@/modules/student/student.model';
+
+const route = useRoute();
+const id = route.query.id as string;
+const name = route.query.name + '的成绩';
 
 const echarts = ref();
 const dataX = ref<string[]>(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
@@ -59,7 +67,7 @@ const series = ref<EchartsLineBarSeriesModel[]>([
         name: '销量',
         type: 'bar',
         data: [5, 20, 36, 10, 10, 20, 10, 20, 36, 10, 10, 20],
-        color: colorBlue,
+        color: colorRed,
         smooth: true,
     },
 ]);
@@ -81,30 +89,33 @@ const change = () => {
 
 const tbChange = () => {
     if (formData.tb === '1') {
-        series.value = [
-            {
-                name: '销量',
-                type: 'bar',
-                data: [5, 20, 36, 10, 10, 20, 10, 20, 36, 10, 10, 20],
-                color: colorBlue,
-                smooth: true,
-            },
-            {
-                name: '销量',
-                type: 'bar',
-                color: colorBlue,
-                smooth: true,
-                data: [5, 20, 36, 10, 10, 20, 10],
-            },
-        ];
+        getStudentGradesCompare();
     } else {
-        dataX.value = ['1', '2', '33', '55', '5', 'ss', '7', '8', '9', '10', '11', '12'];
-        boundaryGap.value = !boundaryGap.value;
+        getStudentGrades();
+    }
+};
+
+const formData = reactive({
+    year: moment().format('YYYY'),
+    semester: '1',
+    exam: '',
+    tb: '1',
+});
+
+const getStudentGrades = async () => {
+    const res = await service.getStudentGrades(id, formData.year, formData.semester);
+    if (res.status) {
+        dataX.value.length = 0;
+        const dataY: number[] = [];
+        res.data.forEach((item: StudentGradeModel) => {
+            dataX.value.push(item.exam);
+            dataY.push(item.score);
+        });
         series.value = [
             {
-                name: '销量',
+                name: '成绩',
                 type: 'line',
-                data: [5, 20, 36, 10, 10, 20, 10, 20, 36, 10, 10, 20],
+                data: dataY,
                 color: colorBlue,
                 smooth: true,
             },
@@ -112,11 +123,38 @@ const tbChange = () => {
     }
 };
 
-const formData = reactive({
-    year: moment().format('YYYY'),
-    semester: '',
-    exam: '',
-    tb: '1',
+const getStudentGradesCompare = async () => {
+    const res = await service.getStudentGradesCompare(id, formData.year, formData.semester);
+    if (res.status) {
+        dataX.value.length = 0;
+        const dataY1: number[] = [];
+        const dataY2: number[] = [];
+        res.data.forEach((item: StudentGradeCompareModel) => {
+            dataX.value.push(item.exam);
+            dataY1.push(item.current_score);
+            dataY2.push(item.previous_score);
+        });
+        series.value = [
+            {
+                name: '当前成绩',
+                type: 'bar',
+                data: dataY1,
+                color: colorBlue,
+                smooth: true,
+            },
+            {
+                name: '上期成绩',
+                type: 'bar',
+                color: colorRed,
+                smooth: true,
+                data: dataY2,
+            },
+        ];
+    }
+};
+
+onMounted(() => {
+    getStudentGradesCompare();
 });
 </script>
 
@@ -147,6 +185,7 @@ const formData = reactive({
         border-radius: 8px;
         display: flex;
         flex-direction: column;
+        padding: 16px;
     }
 }
 </style>
